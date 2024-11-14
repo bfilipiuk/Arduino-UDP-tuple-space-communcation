@@ -1,0 +1,71 @@
+#Opis zasobow
++ qHumidity,quantity,Z5
++ sOpening,status,D13        # input 0=OPEN, 1=CLOSED
+#test
+:  1, sOpening, 0
+:  1 , qHumidity, 0
+:  20000000, qHumidity, 1
+:  30000000, qHumidity, 0
+:  40000000, qHumidity, 1
+:  50000000, qHumidity, 0
+:  60000000, qHumidity, 1
+:  70000000, qHumidity, 0
+:  80000001, qHumidity, 1
+:  90000001, qHumidity, 1
+:  100000001, qHumidity, 1
+:  110000001, qHumidity, 1
+:  120000001, qHumidity, 1
+:  130000001, qHumidity, 0
+:  140000001, qHumidity, 1
+:  150000001, qHumidity, 0
+:  160000001, qHumidity, 0
+:  170000001, qHumidity, 0
+:  180000001, qHumidity, 1
+:  190000001, qHumidity, 1
+:  200000001, qHumidity, 1
+:  210000001, qHumidity, 1
+:  220000001, qHumidity, 1
+:  230000001, qHumidity, 0
+:  240000001, qHumidity, 0
+:  250000001, qHumidity, 1
+:  260000001, qHumidity, 1
+:  270000001, qHumidity, 0
+:  280000001, qHumidity, 1
+:  290000001, qHumidity, 0
+:  300000001, qHumidity, 1
+:  310000001, qHumidity, 1
+:  320000001, qHumidity, 0
+:  330000001, qHumidity, 0
+:  340000001, qHumidity, 0
+:  350000001, qHumidity, 1
+:  360000001, qHumidity, 1
+:  370000001, qHumidity, 1
+:  380000001, qHumidity, 0
+:  390000001, qHumidity, 0
+:  400000001, qHumidity, 1
+:  410000001, qHumidity, 0
+:  420000001, qHumidity, 1
+:  430000001, qHumidity, 0
+:  440000001, qHumidity, 1
+:  450000001, qHumidity, 1
+:  460000001, qHumidity, 1
+:  470000001, qHumidity, 0
+:  480000001, qHumidity, 0
+:  490000001, qHumidity, 1
+:  500000001, qHumidity, 1
+:  510000001, qHumidity, 0
+:  520000001, qHumidity, 1
+:  530000001, qHumidity, 1
+:  540000001, qHumidity, 0
+:  550000001, qHumidity, 0
+:  560000001, qHumidity, 1
+:  570000001, qHumidity, 1
+:  580000001, qHumidity, 1
+:  590000001, qHumidity, 0
+:  600000001, qHumidity, 1
+
+:  610000002, sOpening, 1
+#: ##uwaga jest bledem jezeli ostatnia linia nie jest pusta lub komentarzem
+#:: 100000000, sOpening, 0+ qHumidity,quantity,Z1               # input 0=-10 1023=+2
+
+# xxxxx

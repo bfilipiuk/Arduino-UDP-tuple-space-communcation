@@ -27,34 +27,35 @@ int main() {
     int sockfd;
     struct sockaddr_in serverAddr;
 
-    field_t fields[2]; // Przyjmujemy, że każda krotka ma 2 pola
+    field_t fields[2];
 
-    // Utworzenie gniazda UDP
+    // Initializing UDP socket
     sockfd = socket(PF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
-        perror("Błąd przy tworzeniu gniazda");
+        perror("Error while creating socket");
         exit(EXIT_FAILURE);
     }
 
-    // Konfiguracja adresu serwera
+    // Server address configuration
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // Przypisanie adresu do gniazda
+    // Binding address to socket
     if (bind(sockfd, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0) {
-        perror("Błąd przy przypisywaniu adresu do gniazda");
+        perror("Error while binding address to socket");
         exit(EXIT_FAILURE);
     }
 
-    printf("Serwer UDP uruchomiony na porcie %d.\n", SERVER_PORT);
+    printf("UDP server running on port %d.\n", SERVER_PORT);
 
     while (1) {
         struct sockaddr_in clientAddr;
         socklen_t addr_size = sizeof(clientAddr);
         char buffer[BUFFER_SIZE];
 
+        // Checking for clients requests
         int recv_len = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &clientAddr, &addr_size);
         if (recv_len > 0) {
             buffer[recv_len] = '\0';
@@ -62,21 +63,23 @@ int main() {
             int command, num_fields;
             char tuple_name[32];
             deserializePacket(buffer, &command, tuple_name, fields, &num_fields);
-            printf("Otrzymano polecenie: %d, nazwa: %s\n", command, tuple_name);
+            printf("Received command: %d, name: %s\n", command, tuple_name);
 
+            // Checking if request is from manager
             if (strcmp(tuple_name, "managerReq") == 0) {
                 if (command == TS_OUT) {
-                    // Dodanie krotki do tablicy taskow
+                    // Adding task to tasks tuple space
                     if (tupleCount < MAX_TUPLES) {
-                        tuples[tupleCount][0] = fields[0]; // Pierwsze pole
-                        tuples[tupleCount][1] = fields[1]; // Drugie pole
+                        tuples[tupleCount][0] = fields[0];
+                        tuples[tupleCount][1] = fields[1];
                         tupleCount++;
                     } else {
-                        printf("Brak miejsca dla nowych krotek taskow.\n");
+                        printf("Maximum tasks have been reached.\n");
                     }
                 }
                 
                 if (command == TS_INP) {
+                    // Sending solution to manager
                     memcpy(&managerAddr, &clientAddr, sizeof(clientAddr));
                     managerAddrSet = 1;
 
@@ -87,9 +90,8 @@ int main() {
                         int total_packet_size = serializePacket(send_buffer, TS_OUT, tuple_name, res_tuples[0], 2);
 
                         sendto(sockfd, send_buffer, total_packet_size, 0, (struct sockaddr *) &managerAddr, managerAddrSize);
-                        printf("Wysyłanie pakietu do managera. Dane: [%d, %d]\n", res_tuples[0][0].data.int_field, res_tuples[0][1].data.int_field);
+                        printf("Sending solution to manager. Data: [%d, %d]\n", res_tuples[0][0].data.int_field, res_tuples[0][1].data.int_field);
 
-                        // Usunięcie wysłanej krotki i przesunięcie pozostałych krotek
                         for (int i = 0; i < resTupleCount - 1; i++) {
                             res_tuples[i][0] = res_tuples[i + 1][0];
                             res_tuples[i][1] = res_tuples[i + 1][1];
@@ -99,20 +101,22 @@ int main() {
                 }
             }                
 
+            // Checking if request is from worker
             if (strcmp(tuple_name, "workerReq") == 0) {
                 if (command == TS_OUT) {
-                    // Dodanie krotki do tablicy wynikow
+                    // Adding tuple to solutions tuple space
                     if (resTupleCount < MAX_TUPLES) {
-                        res_tuples[resTupleCount][0] = fields[0]; // Pierwsze pole
-                        res_tuples[resTupleCount][1] = fields[1]; // Drugie pole
+                        res_tuples[resTupleCount][0] = fields[0];
+                        res_tuples[resTupleCount][1] = fields[1];
                         resTupleCount++;
                     } else {
-                        printf("Brak miejsca dla nowych krotek wynikow.\n");
+                        printf("Maximum solutions have been reached.\n");
                     }
                 }
             
 
                 if (command == TS_INP) {
+                    // Sending task to worker
                     memcpy(&sensingAddr, &clientAddr, sizeof(clientAddr));
                     sensingAddrSet = 1;
 
@@ -121,11 +125,9 @@ int main() {
                     if (sensingAddrSet && tupleCount > 0) {
                         char send_buffer[BUFFER_SIZE];
                         int total_packet_size = serializePacket(send_buffer, TS_OUT, tuple_name, tuples[0], 2);
-                        // printf("%d\n", total_packet_size);
                         sendto(sockfd, send_buffer, total_packet_size, 0, (struct sockaddr *) &sensingAddr, sensingAddrSize);
-                        printf("Wysyłanie pakietu do workera. Dane: [%d, %d]\n", tuples[0][0].data.int_field, tuples[0][1].data.int_field);
+                        printf("Sending task to worker. Data: [%d, %d]\n", tuples[0][0].data.int_field, tuples[0][1].data.int_field);
 
-                        // Usunięcie wysłanej krotki i przesunięcie pozostałych krotek
                         for (int i = 0; i < tupleCount - 1; i++) {
                             tuples[i][0] = tuples[i + 1][0];
                             tuples[i][1] = tuples[i + 1][1];
@@ -135,8 +137,8 @@ int main() {
                 }
             }
 
-            // Wypisanie aktualnego stanu przestrzeni krotek
-            printf("Przestrzeń krotek taskow: \n");
+            // Printing current tasks tuple space status
+            printf("Tasks tuple space: \n");
             printf("[");
             for (int i = 0; i < tupleCount; i++) {
                 printf("[%d, %d]", tuples[i][0].data.int_field, tuples[i][1].data.int_field);
@@ -146,7 +148,8 @@ int main() {
             }
             printf("]\n");
 
-            printf("Przestrzeń krotek wynikow: \n");
+            // Printing current solutions tuple space status
+            printf("Solutions tuple space: \n");
             printf("[");
             for (int i = 0; i < resTupleCount; i++) {
                 printf("[%d, %d]", res_tuples[i][0].data.int_field, res_tuples[i][1].data.int_field);
@@ -159,6 +162,5 @@ int main() {
             printf("\n");
         }
     }
-
     return 0;
 }

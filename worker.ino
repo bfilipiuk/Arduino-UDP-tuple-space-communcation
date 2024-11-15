@@ -1,5 +1,5 @@
-#include <ZsutEthernet.h>
-#include <ZsutEthernetUdp.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 #include "tuple_space.h"
 #include "udp_manager.h"
 
@@ -31,15 +31,15 @@ void setup() {
 }
 
 void loop() {
-    field_t fields[2]; // Zakładamy, że mamy dwa pola w krotce
+    field_t fields[2];
     field_t result_fields[2];
-    int num_fields = 2; // Liczba pól w krotce
+    int num_fields = 2;
     bool result;
 
+    // Taking tuple from tuple space
     int received = ts_inp("workerReq", fields, num_fields);
     if (received == TS_SUCCESS) {
-        Serial.print("Otrzymano: [");
-        // Wypisanie zawartości krotki
+        Serial.print("Received: [");
         for (int i = 0; i < num_fields; ++i) {
             Serial.print(fields[i].data.int_field);
             if (i < num_fields - 1) {
@@ -48,37 +48,40 @@ void loop() {
         }
         Serial.println("]");
 
+        // Checking if number is prime
         result = isPrime(fields[1].data.int_field);
         if (result == true) {
             Serial.print(fields[1].data.int_field);
-            Serial.println("-liczba pierwsza-1");
+            Serial.println("-is prime-1");
 
             initializeTuple(result_fields, 1, fields[1].data.int_field);
 
-            Serial.print("Krotka do wysłania: ");
+            Serial.print("Tuple to send: ");
             Serial.print(result_fields[0].data.int_field);
             Serial.print(", ");
             Serial.print(result_fields[1].data.int_field);
             Serial.println("]");
-
+            
+            // Sending tuple to tuple space
             ts_out("workerReq", result_fields, 2);
 
         } else {
             Serial.print(fields[1].data.int_field);
-            Serial.println("-nie liczba pierwsza-0");
+            Serial.println("-is not prime-0");
 
             initializeTuple(result_fields, 0, fields[1]. data.int_field);
 
-            Serial.print("Krotka do wyslania: [");
+            Serial.print("Tuple to send: [");
             Serial.print(result_fields[0].data.int_field);
             Serial.print(", ");
             Serial.print(result_fields[1].data.int_field);
             Serial.println("]");
 
+            // Sending tuple to tuple space
             ts_out("workerReq", result_fields, 2);
         }
     } else {
-        Serial.println("Blad przy odbieraniu krotki");
+        Serial.println("Error while receiving tuple");
     }
 
     Serial.println();

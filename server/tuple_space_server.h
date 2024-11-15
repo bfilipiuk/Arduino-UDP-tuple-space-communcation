@@ -24,31 +24,31 @@ extern "C" {
 #define FIELD_2_TYPE_POS    (sizeof(char) * 8 - 7)  
 
 typedef struct {
-    int is_actual;  /* does the data member contains data */
-    int type;       /* what is the type of the data member */
+    int is_actual; 
+    int type;      
     union {
         int int_field;
         float float_field;
         char* string_field;
     } data;
-} field_t;          /* a new type corresponding to one field of a tuple*/
+} field_t;         
 
-// this function creates tuple with two fields
+// Creates tuple with two fields
 void initializeTuple(field_t *fields, int task, int number);
 
-// this function sends tuple to tuple space
+// Sends tuple to tuple space
 int ts_out (char*, field_t *, int);
 
-// this function takes tuple from tuple space and then deletes it from there
+// Takes tuple from tuple space and then deletes it from there
 int ts_inp (char*, field_t *, int);
 
-// this function serializes tuple so it can be send via UDP
+// Serializes tuple so it can be send via UDP
 int serializePacket(char* packet, int command, char* tuple_name, field_t* fields, int num_fields);
 
-// this function deserializes tuple so it can be received with UDP
+// Deserializes tuple so it can be received with UDP
 int deserializePacket(char* packet, int* command, char* tuple_name, field_t* fields, int* num_fields);
 
-// changes bytes to int
+// Changes bytes to int
 int bytesToInt(unsigned char byte1, unsigned char byte2, unsigned char byte3, unsigned char byte4);
 
 #endif

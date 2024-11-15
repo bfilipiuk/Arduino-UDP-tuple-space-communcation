@@ -1,18 +1,18 @@
 #ifndef UDP_MANAGER_H
 #define UDP_MANAGER_H
 
-#include <ZsutEthernet.h>
-#include <ZsutEthernetUdp.h>
+#include <Ethernet.h>
+#include <EthernetUdp.h>
 
-extern ZsutEthernetUDP Udp;
+extern EthernetUDP udp;
 
-// this function sets up udp connection
+// Sets up UDP connection
 void udp_setup();
 
-// this function sends UDP message
+// Sends UDP message
 int udp_send_packet(unsigned char *buffer, int length);
 
-// this function receives UDP message
+// Receives UDP message
 int udp_receive_packet(char *buffer, int length);
 
 #endif

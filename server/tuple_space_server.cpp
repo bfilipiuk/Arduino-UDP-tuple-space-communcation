@@ -51,22 +51,16 @@ int serializePacket(char* packet, int command, char* tuple_name, field_t* fields
 int deserializePacket(char* packet, int* command, char* tuple_name, field_t* fields, int* num_fields) {
     int total_packet_size = 0;
 
-    // Extract flags_combined byte
     unsigned char flags_combined = packet[total_packet_size++];
-    // Extract tuple_name length
     int tuple_name_length = packet[total_packet_size++];
-    // Extract tuple_name
     for (int i = 0; i < tuple_name_length; ++i) {
         tuple_name[i] = packet[total_packet_size++];
     }
-    tuple_name[tuple_name_length] = '\0'; // Null-terminate the string
+    tuple_name[tuple_name_length] = '\0';
 
-    // Reconstruct command and num_fields from flags_combined
     *command = packet[0] >> COMMAND_TYPE_POS & COMMAND_TYPE_MASK;
-    // *num_fields = getBit(packet[0], NUM_FIELDS_POS)+1;
     *num_fields = (packet[0] >> NUM_FIELDS_POS) & 1;
 
-    // Extract fields
     int bit_pos = 4;
     for (int i = 0; i <= *num_fields; i++)
     {
@@ -75,7 +69,6 @@ int deserializePacket(char* packet, int* command, char* tuple_name, field_t* fie
 
         if (fields[i].is_actual == TS_YES) {
             if (fields[i].type == TS_INT) {
-                // Assuming sizeof(int) is 4 bytes
                 fields[i].data.int_field = bytesToInt(
                     packet[total_packet_size++],
                     packet[total_packet_size++],
@@ -92,11 +85,11 @@ int deserializePacket(char* packet, int* command, char* tuple_name, field_t* fie
 void initializeTuple(field_t *fields, int task, int number) {
     fields[0].is_actual = TS_YES;
     fields[0].type = TS_INT;
-    fields[0].data.int_field = task; // Zadanie przekazane jako argument
+    fields[0].data.int_field = task;
 
     fields[1].is_actual = TS_YES;
     fields[1].type = TS_INT;
-    fields[1].data.int_field = number; // Liczba przekazana jako argument
+    fields[1].data.int_field = number;
 }
 
 int ts_out(char* tuple_name, field_t* fields, int num_fields) {
@@ -116,18 +109,18 @@ int ts_inp(char* tuple_name, field_t* fields, int num_fields) {
 
     int total_packet_size = serializePacket((char*)packet, TS_INP, tuple_name, fields, num_fields);
     if (total_packet_size <= 0) {
-        return TS_FAILURE; // Błąd serializacji
+        return TS_FAILURE;
     }
 
     if (udp_send_packet(packet, total_packet_size) != 1) {
-        return TS_FAILURE; // Błąd wysyłania
+        return TS_FAILURE;
     }
 
     memset(packet, 0, sizeof(packet));
     // delay(700);
     int total_packet_size_rec = udp_receive_packet((char*)packet, 1024);
     if (total_packet_size_rec <= 0) {
-        return TS_FAILURE; // Błąd odbioru
+        return TS_FAILURE;
     }
 
     int command;

@@ -87,11 +87,11 @@ int deserializePacket(char* packet, int* command, char* tuple_name, field_t* fie
 void initializeTuple(field_t *fields, int task, int number) {
     fields[0].is_actual = TS_YES;
     fields[0].type = TS_INT;
-    fields[0].data.int_field = task; // Zadanie przekazane jako argument
+    fields[0].data.int_field = task;
 
     fields[1].is_actual = TS_YES;
     fields[1].type = TS_INT;
-    fields[1].data.int_field = number; // Liczba przekazana jako argument
+    fields[1].data.int_field = number;
 }
 
 int ts_out(char* tuple_name, field_t* fields, int num_fields) {
@@ -111,18 +111,18 @@ int ts_inp(char* tuple_name, field_t* fields, int num_fields) {
 
     int total_packet_size = serializePacket((char*)packet, TS_INP, tuple_name, fields, num_fields);
     if (total_packet_size <= 0) {
-        return TS_FAILURE; // Błąd serializacji
+        return TS_FAILURE;
     }
 
     if (udp_send_packet(packet, total_packet_size) != 1) {
-        return TS_FAILURE; // Błąd wysyłania
+        return TS_FAILURE;
     }
 
     memset(packet, 0, sizeof(packet));
     delay(700);
     int total_packet_size_rec = udp_receive_packet((char*)packet, 1024);
     if (total_packet_size_rec <= 0) {
-        return TS_FAILURE; // Błąd odbioru
+        return TS_FAILURE;
     }
 
     int command;
